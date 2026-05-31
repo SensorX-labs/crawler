@@ -1,0 +1,20 @@
+# dependencies
+/node_modules/
+
+# local env files
+.env
+.env.*
+!.env.example
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# crawled data files
+products_*.json
+
+# OS files
+.DS_Store
+Thumbs.db

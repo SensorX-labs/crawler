@@ -1,0 +1,15 @@
+{
+  "name": "sensorx-crawler",
+  "version": "1.0.0",
+  "description": "Crawler and Importer for SensorX Data",
+  "main": "crawl.js",
+  "type": "module",
+  "scripts": {
+    "crawl": "node crawl.js",
+    "import": "node import.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12"
+  }
+}
