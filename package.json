@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "crawl": "node crawl.js",
-    "import": "node import.js"
+    "import": "node import.js",
+    "crawl-haiau": "node crawl_haiau.js",
+    "create-prices": "node create-prices.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
