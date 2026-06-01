@@ -1,0 +1,722 @@
+[
+  {
+    "event": 1,
+    "k": 1.498264,
+    "idleWeight": 0.100128,
+    "learningRate": 0.01
+  },
+  {
+    "event": 2,
+    "k": 1.501072,
+    "idleWeight": 0.099856,
+    "learningRate": 0.01
+  },
+  {
+    "event": 3,
+    "k": 1.499527,
+    "idleWeight": 0.099999,
+    "learningRate": 0.01
+  },
+  {
+    "event": 4,
+    "k": 1.498277,
+    "idleWeight": 0.100181,
+    "learningRate": 0.01
+  },
+  {
+    "event": 5,
+    "k": 1.496856,
+    "idleWeight": 0.100357,
+    "learningRate": 0.01
+  },
+  {
+    "event": 6,
+    "k": 1.495539,
+    "idleWeight": 0.100537,
+    "learningRate": 0.01
+  },
+  {
+    "event": 7,
+    "k": 1.497636,
+    "idleWeight": 0.100295,
+    "learningRate": 0.01
+  },
+  {
+    "event": 8,
+    "k": 1.499071,
+    "idleWeight": 0.100067,
+    "learningRate": 0.01
+  },
+  {
+    "event": 9,
+    "k": 1.500404,
+    "idleWeight": 0.09984,
+    "learningRate": 0.01
+  },
+  {
+    "event": 10,
+    "k": 1.50122,
+    "idleWeight": 0.09962,
+    "learningRate": 0.01
+  },
+  {
+    "event": 11,
+    "k": 1.502247,
+    "idleWeight": 0.099399,
+    "learningRate": 0.01
+  },
+  {
+    "event": 12,
+    "k": 1.502796,
+    "idleWeight": 0.099185,
+    "learningRate": 0.01
+  },
+  {
+    "event": 13,
+    "k": 1.503438,
+    "idleWeight": 0.098969,
+    "learningRate": 0.01
+  },
+  {
+    "event": 14,
+    "k": 1.504001,
+    "idleWeight": 0.098753,
+    "learningRate": 0.01
+  },
+  {
+    "event": 15,
+    "k": 1.504821,
+    "idleWeight": 0.098533,
+    "learningRate": 0.01
+  },
+  {
+    "event": 16,
+    "k": 1.505576,
+    "idleWeight": 0.098314,
+    "learningRate": 0.01
+  },
+  {
+    "event": 17,
+    "k": 1.506257,
+    "idleWeight": 0.098097,
+    "learningRate": 0.01
+  },
+  {
+    "event": 18,
+    "k": 1.505907,
+    "idleWeight": 0.098301,
+    "learningRate": 0.01
+  },
+  {
+    "event": 19,
+    "k": 1.50653,
+    "idleWeight": 0.098085,
+    "learningRate": 0.01
+  },
+  {
+    "event": 20,
+    "k": 1.506915,
+    "idleWeight": 0.097872,
+    "learningRate": 0.01
+  },
+  {
+    "event": 21,
+    "k": 1.506271,
+    "idleWeight": 0.098072,
+    "learningRate": 0.01
+  },
+  {
+    "event": 22,
+    "k": 1.505806,
+    "idleWeight": 0.098274,
+    "learningRate": 0.01
+  },
+  {
+    "event": 23,
+    "k": 1.506184,
+    "idleWeight": 0.098061,
+    "learningRate": 0.01
+  },
+  {
+    "event": 24,
+    "k": 1.505675,
+    "idleWeight": 0.098263,
+    "learningRate": 0.01
+  },
+  {
+    "event": 25,
+    "k": 1.50516,
+    "idleWeight": 0.098465,
+    "learningRate": 0.01
+  },
+  {
+    "event": 26,
+    "k": 1.505577,
+    "idleWeight": 0.098252,
+    "learningRate": 0.01
+  },
+  {
+    "event": 27,
+    "k": 1.505051,
+    "idleWeight": 0.098454,
+    "learningRate": 0.01
+  },
+  {
+    "event": 28,
+    "k": 1.50469,
+    "idleWeight": 0.098658,
+    "learningRate": 0.01
+  },
+  {
+    "event": 29,
+    "k": 1.50419,
+    "idleWeight": 0.098861,
+    "learningRate": 0.01
+  },
+  {
+    "event": 30,
+    "k": 1.504634,
+    "idleWeight": 0.098648,
+    "learningRate": 0.01
+  },
+  {
+    "event": 31,
+    "k": 1.503997,
+    "idleWeight": 0.098849,
+    "learningRate": 0.01
+  },
+  {
+    "event": 32,
+    "k": 1.503555,
+    "idleWeight": 0.099053,
+    "learningRate": 0.01
+  },
+  {
+    "event": 33,
+    "k": 1.503064,
+    "idleWeight": 0.099256,
+    "learningRate": 0.01
+  },
+  {
+    "event": 34,
+    "k": 1.503564,
+    "idleWeight": 0.099043,
+    "learningRate": 0.01
+  },
+  {
+    "event": 35,
+    "k": 1.50318,
+    "idleWeight": 0.099248,
+    "learningRate": 0.01
+  },
+  {
+    "event": 36,
+    "k": 1.503478,
+    "idleWeight": 0.099037,
+    "learningRate": 0.01
+  },
+  {
+    "event": 37,
+    "k": 1.503706,
+    "idleWeight": 0.098826,
+    "learningRate": 0.01
+  },
+  {
+    "event": 38,
+    "k": 1.503489,
+    "idleWeight": 0.099032,
+    "learningRate": 0.01
+  },
+  {
+    "event": 39,
+    "k": 1.503762,
+    "idleWeight": 0.098821,
+    "learningRate": 0.01
+  },
+  {
+    "event": 40,
+    "k": 1.504046,
+    "idleWeight": 0.098611,
+    "learningRate": 0.01
+  },
+  {
+    "event": 41,
+    "k": 1.503767,
+    "idleWeight": 0.098816,
+    "learningRate": 0.01
+  },
+  {
+    "event": 42,
+    "k": 1.503998,
+    "idleWeight": 0.098606,
+    "learningRate": 0.01
+  },
+  {
+    "event": 43,
+    "k": 1.504214,
+    "idleWeight": 0.098396,
+    "learningRate": 0.01
+  },
+  {
+    "event": 44,
+    "k": 1.503992,
+    "idleWeight": 0.098603,
+    "learningRate": 0.01
+  },
+  {
+    "event": 45,
+    "k": 1.504226,
+    "idleWeight": 0.098392,
+    "learningRate": 0.01
+  },
+  {
+    "event": 46,
+    "k": 1.504388,
+    "idleWeight": 0.098183,
+    "learningRate": 0.01
+  },
+  {
+    "event": 47,
+    "k": 1.504226,
+    "idleWeight": 0.09839,
+    "learningRate": 0.01
+  },
+  {
+    "event": 48,
+    "k": 1.504461,
+    "idleWeight": 0.098179,
+    "learningRate": 0.01
+  },
+  {
+    "event": 49,
+    "k": 1.504662,
+    "idleWeight": 0.097969,
+    "learningRate": 0.01
+  },
+  {
+    "event": 50,
+    "k": 1.504552,
+    "idleWeight": 0.098177,
+    "learningRate": 0.01
+  },
+  {
+    "event": 51,
+    "k": 1.504336,
+    "idleWeight": 0.098383,
+    "learningRate": 0.01
+  },
+  {
+    "event": 52,
+    "k": 1.504162,
+    "idleWeight": 0.09859,
+    "learningRate": 0.01
+  },
+  {
+    "event": 53,
+    "k": 1.50432,
+    "idleWeight": 0.098381,
+    "learningRate": 0.01
+  },
+  {
+    "event": 54,
+    "k": 1.504046,
+    "idleWeight": 0.098587,
+    "learningRate": 0.01
+  },
+  {
+    "event": 55,
+    "k": 1.504203,
+    "idleWeight": 0.098377,
+    "learningRate": 0.01
+  },
+  {
+    "event": 56,
+    "k": 1.503993,
+    "idleWeight": 0.098584,
+    "learningRate": 0.01
+  },
+  {
+    "event": 57,
+    "k": 1.503847,
+    "idleWeight": 0.098791,
+    "learningRate": 0.01
+  },
+  {
+    "event": 58,
+    "k": 1.503625,
+    "idleWeight": 0.098997,
+    "learningRate": 0.01
+  },
+  {
+    "event": 59,
+    "k": 1.503774,
+    "idleWeight": 0.098788,
+    "learningRate": 0.01
+  },
+  {
+    "event": 60,
+    "k": 1.503892,
+    "idleWeight": 0.098579,
+    "learningRate": 0.01
+  },
+  {
+    "event": 61,
+    "k": 1.503771,
+    "idleWeight": 0.098786,
+    "learningRate": 0.01
+  },
+  {
+    "event": 62,
+    "k": 1.503625,
+    "idleWeight": 0.098993,
+    "learningRate": 0.01
+  },
+  {
+    "event": 63,
+    "k": 1.503465,
+    "idleWeight": 0.0992,
+    "learningRate": 0.01
+  },
+  {
+    "event": 64,
+    "k": 1.503333,
+    "idleWeight": 0.099408,
+    "learningRate": 0.01
+  },
+  {
+    "event": 65,
+    "k": 1.503458,
+    "idleWeight": 0.099198,
+    "learningRate": 0.01
+  },
+  {
+    "event": 66,
+    "k": 1.503294,
+    "idleWeight": 0.099406,
+    "learningRate": 0.01
+  },
+  {
+    "event": 67,
+    "k": 1.503165,
+    "idleWeight": 0.099613,
+    "learningRate": 0.01
+  },
+  {
+    "event": 68,
+    "k": 1.503277,
+    "idleWeight": 0.099404,
+    "learningRate": 0.01
+  },
+  {
+    "event": 69,
+    "k": 1.503489,
+    "idleWeight": 0.099194,
+    "learningRate": 0.01
+  },
+  {
+    "event": 70,
+    "k": 1.503617,
+    "idleWeight": 0.098985,
+    "learningRate": 0.01
+  },
+  {
+    "event": 71,
+    "k": 1.503719,
+    "idleWeight": 0.098776,
+    "learningRate": 0.01
+  },
+  {
+    "event": 72,
+    "k": 1.503577,
+    "idleWeight": 0.098983,
+    "learningRate": 0.01
+  },
+  {
+    "event": 73,
+    "k": 1.503442,
+    "idleWeight": 0.09919,
+    "learningRate": 0.01
+  },
+  {
+    "event": 74,
+    "k": 1.503323,
+    "idleWeight": 0.099398,
+    "learningRate": 0.01
+  },
+  {
+    "event": 75,
+    "k": 1.503458,
+    "idleWeight": 0.099188,
+    "learningRate": 0.01
+  },
+  {
+    "event": 76,
+    "k": 1.503356,
+    "idleWeight": 0.099396,
+    "learningRate": 0.01
+  },
+  {
+    "event": 77,
+    "k": 1.503477,
+    "idleWeight": 0.099187,
+    "learningRate": 0.01
+  },
+  {
+    "event": 78,
+    "k": 1.503369,
+    "idleWeight": 0.099394,
+    "learningRate": 0.01
+  },
+  {
+    "event": 79,
+    "k": 1.503264,
+    "idleWeight": 0.099602,
+    "learningRate": 0.01
+  },
+  {
+    "event": 80,
+    "k": 1.50339,
+    "idleWeight": 0.099393,
+    "learningRate": 0.01
+  },
+  {
+    "event": 81,
+    "k": 1.503529,
+    "idleWeight": 0.099184,
+    "learningRate": 0.01
+  },
+  {
+    "event": 82,
+    "k": 1.503406,
+    "idleWeight": 0.099391,
+    "learningRate": 0.01
+  },
+  {
+    "event": 83,
+    "k": 1.503492,
+    "idleWeight": 0.099182,
+    "learningRate": 0.01
+  },
+  {
+    "event": 84,
+    "k": 1.503595,
+    "idleWeight": 0.098973,
+    "learningRate": 0.01
+  },
+  {
+    "event": 85,
+    "k": 1.503706,
+    "idleWeight": 0.098764,
+    "learningRate": 0.01
+  },
+  {
+    "event": 86,
+    "k": 1.503597,
+    "idleWeight": 0.098972,
+    "learningRate": 0.01
+  },
+  {
+    "event": 87,
+    "k": 1.503686,
+    "idleWeight": 0.098763,
+    "learningRate": 0.01
+  },
+  {
+    "event": 88,
+    "k": 1.503768,
+    "idleWeight": 0.098554,
+    "learningRate": 0.01
+  },
+  {
+    "event": 89,
+    "k": 1.503853,
+    "idleWeight": 0.098345,
+    "learningRate": 0.01
+  },
+  {
+    "event": 90,
+    "k": 1.503731,
+    "idleWeight": 0.098552,
+    "learningRate": 0.01
+  },
+  {
+    "event": 91,
+    "k": 1.503826,
+    "idleWeight": 0.098344,
+    "learningRate": 0.01
+  },
+  {
+    "event": 92,
+    "k": 1.503928,
+    "idleWeight": 0.098135,
+    "learningRate": 0.01
+  },
+  {
+    "event": 93,
+    "k": 1.504014,
+    "idleWeight": 0.097926,
+    "learningRate": 0.01
+  },
+  {
+    "event": 94,
+    "k": 1.503953,
+    "idleWeight": 0.098134,
+    "learningRate": 0.01
+  },
+  {
+    "event": 95,
+    "k": 1.50404,
+    "idleWeight": 0.097925,
+    "learningRate": 0.01
+  },
+  {
+    "event": 96,
+    "k": 1.503968,
+    "idleWeight": 0.098133,
+    "learningRate": 0.01
+  },
+  {
+    "event": 97,
+    "k": 1.503892,
+    "idleWeight": 0.09834,
+    "learningRate": 0.01
+  },
+  {
+    "event": 98,
+    "k": 1.503785,
+    "idleWeight": 0.098548,
+    "learningRate": 0.01
+  },
+  {
+    "event": 99,
+    "k": 1.50387,
+    "idleWeight": 0.098339,
+    "learningRate": 0.01
+  },
+  {
+    "event": 100,
+    "k": 1.503946,
+    "idleWeight": 0.09813,
+    "learningRate": 0.01
+  },
+  {
+    "event": 101,
+    "k": 1.504007,
+    "idleWeight": 0.097922,
+    "learningRate": 0.01
+  },
+  {
+    "event": 102,
+    "k": 1.503937,
+    "idleWeight": 0.09813,
+    "learningRate": 0.01
+  },
+  {
+    "event": 103,
+    "k": 1.503842,
+    "idleWeight": 0.098337,
+    "learningRate": 0.01
+  },
+  {
+    "event": 104,
+    "k": 1.503923,
+    "idleWeight": 0.098128,
+    "learningRate": 0.01
+  },
+  {
+    "event": 105,
+    "k": 1.504007,
+    "idleWeight": 0.09792,
+    "learningRate": 0.01
+  },
+  {
+    "event": 106,
+    "k": 1.503955,
+    "idleWeight": 0.098128,
+    "learningRate": 0.01
+  },
+  {
+    "event": 107,
+    "k": 1.504001,
+    "idleWeight": 0.097919,
+    "learningRate": 0.01
+  },
+  {
+    "event": 108,
+    "k": 1.503938,
+    "idleWeight": 0.098127,
+    "learningRate": 0.01
+  },
+  {
+    "event": 109,
+    "k": 1.504019,
+    "idleWeight": 0.097918,
+    "learningRate": 0.01
+  },
+  {
+    "event": 110,
+    "k": 1.504097,
+    "idleWeight": 0.097709,
+    "learningRate": 0.01
+  },
+  {
+    "event": 111,
+    "k": 1.504165,
+    "idleWeight": 0.0975,
+    "learningRate": 0.01
+  },
+  {
+    "event": 112,
+    "k": 1.504102,
+    "idleWeight": 0.097708,
+    "learningRate": 0.01
+  },
+  {
+    "event": 113,
+    "k": 1.50402,
+    "idleWeight": 0.097916,
+    "learningRate": 0.01
+  },
+  {
+    "event": 114,
+    "k": 1.504082,
+    "idleWeight": 0.097708,
+    "learningRate": 0.01
+  },
+  {
+    "event": 115,
+    "k": 1.504147,
+    "idleWeight": 0.097499,
+    "learningRate": 0.01
+  },
+  {
+    "event": 116,
+    "k": 1.504205,
+    "idleWeight": 0.09729,
+    "learningRate": 0.01
+  },
+  {
+    "event": 117,
+    "k": 1.504103,
+    "idleWeight": 0.097498,
+    "learningRate": 0.01
+  },
+  {
+    "event": 118,
+    "k": 1.504183,
+    "idleWeight": 0.097289,
+    "learningRate": 0.01
+  },
+  {
+    "event": 119,
+    "k": 1.504123,
+    "idleWeight": 0.097497,
+    "learningRate": 0.01
+  },
+  {
+    "event": 120,
+    "k": 1.504057,
+    "idleWeight": 0.097705,
+    "learningRate": 0.01
+  }
+]

@@ -1,0 +1,176 @@
+[
+  {
+    "staffId": "d18edd9a-d185-4edb-a41e-f2663698fa72",
+    "staffName": "Nguyễn Tùng Sk",
+    "email": "nguyentungsk@gmail.com",
+    "currentWorkload": 32,
+    "categoryPerformances": [
+      {
+        "categoryId": "cat-plc",
+        "categoryName": "PLC",
+        "successCount": 9,
+        "failureCount": 13,
+        "totalMarginAccumulated": 1.9588,
+        "averageMargin": 0.2176,
+        "winRate": 0.4091,
+        "totalRFQs": 22
+      },
+      {
+        "categoryId": "cat-sensor",
+        "categoryName": "Cảm biến",
+        "successCount": 12,
+        "failureCount": 11,
+        "totalMarginAccumulated": 2.7559,
+        "averageMargin": 0.2297,
+        "winRate": 0.5217,
+        "totalRFQs": 23
+      },
+      {
+        "categoryId": "cat-hmi",
+        "categoryName": "HMI",
+        "successCount": 11,
+        "failureCount": 11,
+        "totalMarginAccumulated": 2.3257,
+        "averageMargin": 0.2114,
+        "winRate": 0.5,
+        "totalRFQs": 22
+      },
+      {
+        "categoryId": "cat-inverter",
+        "categoryName": "Biến tần",
+        "successCount": 12,
+        "failureCount": 12,
+        "totalMarginAccumulated": 2.0377,
+        "averageMargin": 0.1698,
+        "winRate": 0.5,
+        "totalRFQs": 24
+      },
+      {
+        "categoryId": "cat-relay",
+        "categoryName": "Relay",
+        "successCount": 6,
+        "failureCount": 8,
+        "totalMarginAccumulated": 1.2805,
+        "averageMargin": 0.2134,
+        "winRate": 0.4286,
+        "totalRFQs": 14
+      }
+    ]
+  },
+  {
+    "staffId": "8a6af2aa-b7ee-482d-9577-3589426e011d",
+    "staffName": "Nguyễn Duy Đức",
+    "email": "nguyenduyduc@gmail.com",
+    "currentWorkload": 27,
+    "categoryPerformances": [
+      {
+        "categoryId": "cat-plc",
+        "categoryName": "PLC",
+        "successCount": 13,
+        "failureCount": 13,
+        "totalMarginAccumulated": 2.1512,
+        "averageMargin": 0.1655,
+        "winRate": 0.5,
+        "totalRFQs": 26
+      },
+      {
+        "categoryId": "cat-sensor",
+        "categoryName": "Cảm biến",
+        "successCount": 6,
+        "failureCount": 11,
+        "totalMarginAccumulated": 1.2592,
+        "averageMargin": 0.2099,
+        "winRate": 0.3529,
+        "totalRFQs": 17
+      },
+      {
+        "categoryId": "cat-hmi",
+        "categoryName": "HMI",
+        "successCount": 5,
+        "failureCount": 12,
+        "totalMarginAccumulated": 1.1538,
+        "averageMargin": 0.2308,
+        "winRate": 0.2941,
+        "totalRFQs": 17
+      },
+      {
+        "categoryId": "cat-inverter",
+        "categoryName": "Biến tần",
+        "successCount": 3,
+        "failureCount": 10,
+        "totalMarginAccumulated": 0.2443,
+        "averageMargin": 0.0814,
+        "winRate": 0.2308,
+        "totalRFQs": 13
+      },
+      {
+        "categoryId": "cat-relay",
+        "categoryName": "Relay",
+        "successCount": 6,
+        "failureCount": 13,
+        "totalMarginAccumulated": 1.4469,
+        "averageMargin": 0.2412,
+        "winRate": 0.3158,
+        "totalRFQs": 19
+      }
+    ]
+  },
+  {
+    "staffId": "d1aa3462-6029-4b8d-a779-e79fb3817a18",
+    "staffName": "Chu Đức Hải",
+    "email": "chuduchai@gmail.com",
+    "currentWorkload": 30,
+    "categoryPerformances": [
+      {
+        "categoryId": "cat-plc",
+        "categoryName": "PLC",
+        "successCount": 10,
+        "failureCount": 10,
+        "totalMarginAccumulated": 2.2433,
+        "averageMargin": 0.2243,
+        "winRate": 0.5,
+        "totalRFQs": 20
+      },
+      {
+        "categoryId": "cat-sensor",
+        "categoryName": "Cảm biến",
+        "successCount": 11,
+        "failureCount": 14,
+        "totalMarginAccumulated": 2.4382,
+        "averageMargin": 0.2217,
+        "winRate": 0.44,
+        "totalRFQs": 25
+      },
+      {
+        "categoryId": "cat-hmi",
+        "categoryName": "HMI",
+        "successCount": 7,
+        "failureCount": 10,
+        "totalMarginAccumulated": 1.1472,
+        "averageMargin": 0.1639,
+        "winRate": 0.4118,
+        "totalRFQs": 17
+      },
+      {
+        "categoryId": "cat-inverter",
+        "categoryName": "Biến tần",
+        "successCount": 11,
+        "failureCount": 10,
+        "totalMarginAccumulated": 2.5614,
+        "averageMargin": 0.2329,
+        "winRate": 0.5238,
+        "totalRFQs": 21
+      },
+      {
+        "categoryId": "cat-relay",
+        "categoryName": "Relay",
+        "successCount": 9,
+        "failureCount": 15,
+        "totalMarginAccumulated": 1.5602,
+        "averageMargin": 0.1734,
+        "winRate": 0.375,
+        "totalRFQs": 24
+      }
+    ]
+  }
+]
