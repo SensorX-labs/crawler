@@ -6,14 +6,13 @@
   "type": "module",
   "scripts": {
     "crawl": "node crawl.js",
-    "import": "node import.js",
-    "crawl-haiau": "node crawl_haiau.js",
-    "create-prices": "node create-prices.js",
-    "simulate": "node simulate-training.js",
-    "seed-staff": "node seed-staff.js"
+    "import": "node import_all.js",
+    "simulate": "node src/simulators/simulate_closing_behavior.js",
+    "seed-staff": "node seed_staff.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
-    "cheerio": "^1.0.0-rc.12"
+    "cheerio": "^1.0.0-rc.12",
+    "inquirer": "^14.0.2"
   }
 }

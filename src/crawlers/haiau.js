@@ -1,7 +1,5 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import fs from 'fs';
-import path from 'path';
 
 const CATEGORIES = {
   'Đầu nối & Chân pin': 'https://codienhaiau.com/category/dau-cosse/',
@@ -51,18 +49,23 @@ async function scrapeCategory(categoryName, url) {
       const priceText = $(el).find('.price').text().trim();
       const link = $(el).find('a').attr('href');
       const price = parsePrice(priceText);
+      const imgEl = $(el).find('img').first();
+      const imageUrl = imgEl.attr('src') || imgEl.attr('data-src') || '';
       
-      if (name && price) {
+      if (name) {
         products.push({
-          category: categoryName,
+          categoryName,
           name,
-          price,
-          link
+          price: price || 0,
+          productUrl: link,
+          imageUrl: imageUrl,
+          supplierName: 'Hải Âu',
+          unitName: 'Cái'
         });
       }
     });
     
-    console.log(`-> Tìm thấy ${products.length} sản phẩm có giá trị.`);
+    console.log(`-> Tìm thấy ${products.length} sản phẩm.`);
   } catch (err) {
     console.error(`Lỗi khi cào danh mục ${categoryName}:`, err.message);
   }
@@ -70,7 +73,7 @@ async function scrapeCategory(categoryName, url) {
   return products;
 }
 
-async function main() {
+export async function scrapeHaiAu() {
   const allProducts = [];
   
   for (const [name, url] of Object.entries(CATEGORIES)) {
@@ -80,9 +83,5 @@ async function main() {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   
-  const outputPath = path.join(process.cwd(), 'haiau_prices.json');
-  fs.writeFileSync(outputPath, JSON.stringify(allProducts, null, 2), 'utf-8');
-  console.log(`\nCào thành công! Đã lưu ${allProducts.length} sản phẩm mẫu vào: ${outputPath}`);
+  return allProducts;
 }
-
-main().catch(console.error);
