@@ -1,6 +1,7 @@
 $databases = @(
     "SensorX_Data", 
     "SensorX_Master", 
+    "SensorX_Warehouse",
     "SensorX_Warehouse_1", 
     "SensorX_Warehouse_2",
     "sensorx_gateway"

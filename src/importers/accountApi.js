@@ -8,7 +8,7 @@ export const STAFF_ACCOUNTS = [
   { email: 'chuduchai@gmail.com', password: '123456', role: 2, fullName: 'Chu Đức Hải', phone: '0399959521' } // Role.SaleStaff
 ];
 
-const CUSTOMER_ACCOUNTS = [
+export const CUSTOMER_ACCOUNTS = [
   {
     email: 'huyhoang@gmail.com',
     password: '123456',

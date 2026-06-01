@@ -2,7 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { STAFF_ACCOUNTS } from '../importers/accountApi.js';
+import { STAFF_ACCOUNTS, CUSTOMER_ACCOUNTS } from '../importers/accountApi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -151,14 +151,12 @@ export async function runSimulation() {
     for (let i = 1; i <= NUM_CUSTOMERS; i++) {
         console.log(`\n--- Bắt đầu giao dịch ${i}/${NUM_CUSTOMERS} ---`);
         
-        const customerEmail = `company${i}@test.com`;
-        const customerClient = new SensorXClient(customerEmail, '123456');
+        const selectedCustomer = CUSTOMER_ACCOUNTS[Math.floor(Math.random() * CUSTOMER_ACCOUNTS.length)];
+        const customerClient = new SensorXClient(selectedCustomer.email, selectedCustomer.password);
         
-        // Register or login
-        await customerClient.register(`CÔNG TY TNHH AI DEMO ${i}`, `09880000${i.toString().padStart(2, '0')}`, `100000${i.toString().padStart(4, '0')}`, 'Hà Nội');
         const loggedIn = await customerClient.login();
         if (!loggedIn) {
-            console.log(`Bỏ qua giao dịch ${i} do không login được Khách hàng.`);
+            console.log(`Bỏ qua giao dịch ${i} do không login được Khách hàng ${selectedCustomer.email}.`);
             continue;
         }
 
