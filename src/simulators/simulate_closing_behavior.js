@@ -237,14 +237,25 @@ export async function runSimulation() {
             // Quản lý duyệt Quote
             await managerClient.approveQuote(quoteId);
 
-            // Nhân viên publish Quote
-            await assignedStaffClient.publishQuote(quoteId);
+            // Chạy bất đồng bộ pha Publish & Respond ở background với độ trễ ngẫu nhiên
+            (async () => {
+                // Giả lập thời gian nhân viên chờ trước khi gửi báo giá cho khách hàng
+                await delay(Math.random() * 5000 + 5000); 
+                
+                console.log(`Giao dịch ${i} - Nhân viên bắt đầu gửi (publish) báo giá.`);
+                await assignedStaffClient.publishQuote(quoteId);
 
-            // Khách hàng phản hồi
-            const isAccepted = Math.random() > 0.3; // 70% win rate
-            await customerClient.respondQuote(quoteId, isAccepted);
+                // Giả lập thời gian khách hàng xem xét báo giá trước khi phản hồi
+                await delay(Math.random() * 3000 + 2000);
 
-            console.log(`Giao dịch ${i} - Khách hàng đã phản hồi: ${isAccepted ? 'CHỐT ĐƠN' : 'TỪ CHỐI'}. (AI Backward Pass triggered)`);
+                const isAccepted = Math.random() > 0.3; // 70% win rate
+                await customerClient.respondQuote(quoteId, isAccepted);
+
+                console.log(`Giao dịch ${i} - Khách hàng đã phản hồi: ${isAccepted ? 'CHỐT ĐƠN' : 'TỪ CHỐI'}. (AI Backward Pass triggered)`);
+            })().catch(err => {
+                console.error(`Lỗi trong background process của giao dịch ${i}:`, err.message);
+            });
+
             return true;
 
         } catch (error) {
