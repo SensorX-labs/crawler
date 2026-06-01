@@ -68,7 +68,7 @@ class SensorXClient {
     }
 }
 
-async function runSimulation() {
+export async function runSimulation() {
     console.log('🚀 Bắt đầu giả lập E2E AI Training (Real Data)...');
 
     // 1. Get a list of products (Use admin or anyone)
@@ -111,11 +111,18 @@ async function runSimulation() {
         let logged = await client.login();
         if (!logged) {
             console.log(`Tạo tài khoản Staff: ${staff.email}...`);
-            await client.createStaff(2); // Role.SaleStaff
+            await client.createStaff(staff.role);
             logged = await client.login();
         }
         if (logged) {
-            staffClients[staff.email] = client;
+            // Get staff profile to get their ID
+            try {
+                const profileRes = await client.axios.get('/api/data/staff/profile');
+                client.staffId = profileRes.data.value.id;
+                staffClients[staff.email] = client;
+            } catch (err) {
+                console.error(`Failed to get profile for ${staff.email}`);
+            }
         } else {
             console.log(`Failed to login staff ${staff.email}`);
         }
@@ -123,6 +130,12 @@ async function runSimulation() {
 
     const NUM_CUSTOMERS = 30;
     let successCount = 0;
+
+    const managerClient = staffClients['manager@sensorx.com'];
+    if (!managerClient) {
+        console.error('Không tìm thấy managerClient để cấp quyền ép phân bổ RFQ!');
+        return;
+    }
 
     for (let i = 1; i <= NUM_CUSTOMERS; i++) {
         console.log(`\n--- Bắt đầu giao dịch ${i}/${NUM_CUSTOMERS} ---`);
@@ -161,22 +174,22 @@ async function runSimulation() {
             // Cho AI vài giây để xử lý
             await delay(1000);
 
-            // Lấy thông tin RFQ bằng Admin để biết Staff nào được assign
-            const rfqDetailRes = await adminClient.axios.get(`/api/master/rfq/${rfqId}`);
+            // Lấy thông tin RFQ bằng Manager để biết Staff nào được assign
+            const rfqDetailRes = await managerClient.axios.get(`/api/master/rfq/${rfqId}`);
             let assignedStaffId = rfqDetailRes.data.value.staffId;
             let wasForceAssigned = false;
             
             if (!assignedStaffId) {
                 console.log(`RFQ chưa được AI phân bổ (StaffId null). Dùng Manager ép phân bổ...`);
                 // Get all staffs to find one
-                const staffsRes = await adminClient.axios.get('/api/master/rfq/load-more-sale-staff?pageIndex=1&pageSize=100&isDescending=false');
+                const staffsRes = await managerClient.axios.get('/api/master/rfq/load-more-sale-staff?pageIndex=1&pageSize=100&isDescending=false');
                 const staffs = staffsRes.data.value?.items || staffsRes.data.value || [];
                 if (staffs.length === 0) {
                     console.error('Không có SaleStaff nào trong hệ thống! Không thể ép phân bổ.');
                     continue;
                 }
                 const randomStaff = staffs[Math.floor(Math.random() * staffs.length)];
-                await adminClient.axios.post(`/api/master/rfq/force-assign`, {
+                await managerClient.axios.post(`/api/master/rfq/force-assign`, {
                     id: rfqId,
                     staffId: randomStaff.id
                 });
@@ -185,16 +198,12 @@ async function runSimulation() {
                 wasForceAssigned = true;
             }
 
-            // Map StaffId to Email (We don't have direct mapping, so we'll try to find which staff got it)
-            // In real app, we'd get the staff's email from an API. Here we just brute force check which staff has this RFQ in their inbox.
+            // Map StaffId to Email
             let assignedStaffClient = null;
             let assignedStaffEmail = '';
             for (const email of Object.keys(staffClients)) {
-                const sClient = staffClients[email];
-                const inboxRes = await sClient.axios.get(`/api/master/rfq?pageIndex=1&pageSize=50&isDescending=false`);
-                const items = inboxRes.data.value?.items || [];
-                if (items.some(x => x.id === rfqId)) {
-                    assignedStaffClient = sClient;
+                if (staffClients[email].staffId === assignedStaffId) {
+                    assignedStaffClient = staffClients[email];
                     assignedStaffEmail = email;
                     break;
                 }
@@ -235,7 +244,7 @@ async function runSimulation() {
             await assignedStaffClient.axios.post(`/api/master/quotes/${quoteId}/submit-for-approval`, {});
 
             // Quản lý Approve
-            await adminClient.axios.post(`/api/master/quotes/${quoteId}/approve`, {});
+            await managerClient.axios.post(`/api/master/quotes/${quoteId}/approve`, {});
             console.log(`Quản lý đã duyệt Quote.`);
 
             // Nhân viên Publish
@@ -269,4 +278,6 @@ async function runSimulation() {
     console.log('Bạn có thể mở giao diện SensorX Frontend > Cài đặt > AI Monitoring để xem lịch sử hội tụ.');
 }
 
-runSimulation();
+if (process.argv[1] && process.argv[1].includes('simulate_closing_behavior.js')) {
+    runSimulation().catch(console.error);
+}

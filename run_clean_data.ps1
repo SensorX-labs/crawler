@@ -15,12 +15,13 @@ Write-Host "Starting data cleanup process..." -ForegroundColor Cyan
 $dockerRunning = docker ps -q -f name=$containerName
 if ($dockerRunning) {
     Write-Host "Tìm thấy Docker container '$containerName'. Bắt đầu xóa dữ liệu..." -ForegroundColor Cyan
-    docker cp $sqlFile "$($containerName):/tmp/$sqlFile"
+    $fileName = Split-Path $sqlFile -Leaf
+    docker cp $sqlFile "$($containerName):/tmp/$fileName"
     
     foreach ($db in $databases) {
         Write-Host "Đang xóa dữ liệu Database: $db ..." -ForegroundColor Yellow
         # Chạy file SQL trong container. Bỏ qua thông báo lỗi nếu database không tồn tại (vd Warehouse_2 chưa tạo)
-        docker exec $containerName psql -U postgres -d $db -f "/tmp/$sqlFile" 2>$null
+        docker exec $containerName psql -U postgres -d $db -f "/tmp/$fileName" 2>$null
         Write-Host "Hoàn tất xóa $db" -ForegroundColor Green
     }
 } else {

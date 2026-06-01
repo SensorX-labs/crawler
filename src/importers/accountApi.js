@@ -2,36 +2,36 @@ import axios from 'axios';
 import { GATEWAY_URL } from '../utils/api.js';
 
 export const STAFF_ACCOUNTS = [
-  { email: 'manager@sensorx.com', password: '123456', role: 4, fullName: 'Manager' }, // Role.Manager
-  { email: 'nguyentungsk@gmail.com', password: '123456', role: 2, fullName: 'Nguyễn Tùng' }, // Role.SaleStaff
-  { email: 'nguyenduyduc@gmail.com', password: '123456', role: 2, fullName: 'Nguyễn Duy Đức' }, // Role.SaleStaff
-  { email: 'chuduchai@gmail.com', password: '123456', role: 2, fullName: 'Chu Đức Hải' } // Role.SaleStaff
+  { email: 'manager@sensorx.com', password: '123456', role: 3, fullName: 'Nguyễn Tùng Sk', phone: '0392604701' }, // Role.Manager
+  { email: 'nguyentungsk@gmail.com', password: '123456', role: 2, fullName: 'Nguyễn Tùng Sk', phone: '0365436609' }, // Role.SaleStaff
+  { email: 'nguyenduyduc@gmail.com', password: '123456', role: 2, fullName: 'Nguyễn Duy Đức', phone: '0353744555' }, // Role.SaleStaff
+  { email: 'chuduchai@gmail.com', password: '123456', role: 2, fullName: 'Chu Đức Hải', phone: '0399959521' } // Role.SaleStaff
 ];
 
 const CUSTOMER_ACCOUNTS = [
-  { 
-    email: 'huyhoang@gmail.com', 
-    password: 'password', 
-    name: 'CÔNG TY TNHH THƯƠNG MẠI VÀ SẢN XUẤT NHÔM NỘI THẤT HUY HOÀNG', 
-    taxCode: '2401076105', 
+  {
+    email: 'huyhoang@gmail.com',
+    password: '123456',
+    name: 'CÔNG TY TNHH THƯƠNG MẠI VÀ SẢN XUẤT NHÔM NỘI THẤT HUY HOÀNG',
+    taxCode: '2401076105',
     phone: '0988111222',
-    address: 'Bắc Giang' 
+    address: 'Bắc Giang'
   },
-  { 
-    email: 'dienca@gmail.com', 
-    password: 'password', 
-    name: 'CÔNG TY TNHH THƯƠNG MẠI XÂY DỰNG VÀ XÂY LẮP ĐIỆN ĐIỀN CA', 
-    taxCode: '0302910196', 
+  {
+    email: 'dienca@gmail.com',
+    password: '123456',
+    name: 'CÔNG TY TNHH THƯƠNG MẠI XÂY DỰNG VÀ XÂY LẮP ĐIỆN ĐIỀN CA',
+    taxCode: '0302910196',
     phone: '0988333444',
-    address: 'Hồ Chí Minh' 
+    address: 'Hồ Chí Minh'
   },
-  { 
-    email: 'dtd@gmail.com', 
-    password: 'password', 
-    name: 'CÔNG TY TNHH SẢN XUẤT SẢN PHẨM ĐIỆN THƯƠNG MẠI TỰ ĐỘNG', 
-    taxCode: '0301439055', 
+  {
+    email: 'dtd@gmail.com',
+    password: '123456',
+    name: 'CÔNG TY TNHH SẢN XUẤT SẢN PHẨM ĐIỆN THƯƠNG MẠI TỰ ĐỘNG',
+    taxCode: '0301439055',
     phone: '0988555666',
-    address: 'Hồ Chí Minh' 
+    address: 'Hồ Chí Minh'
   }
 ];
 
@@ -89,7 +89,7 @@ export async function seedAccountsAndCustomers() {
             password: account.password
           });
           const staffToken = loginRes.data.data.accessToken;
-    
+
           await axios.put(`${GATEWAY_URL}/api/data/staff/profile`, {
             name: account.fullName,
             email: account.email,
@@ -100,7 +100,7 @@ export async function seedAccountsAndCustomers() {
           });
           console.log(`-> Đã cập nhật profile cho: ${account.email}`);
         } catch (updateErr) {
-            console.error(`-> Lỗi cập nhật profile ${account.email}:`, updateErr.response?.data || updateErr.message);
+          console.error(`-> Lỗi cập nhật profile ${account.email}:`, updateErr.response?.data || updateErr.message);
         }
       } else {
         console.error(`-> Lỗi tạo tài khoản ${account.email}:`, err.response?.data || err.message);

@@ -3,6 +3,7 @@ import { getAllJSONFiles, readJSONFile } from './src/utils/api.js';
 import { seedAccountsAndCustomers } from './src/importers/accountApi.js';
 import { importProducts } from './src/importers/productApi.js';
 import { importPrices } from './src/importers/priceApi.js';
+import { runSimulation } from './src/simulators/simulate_closing_behavior.js';
 
 async function main() {
   console.log('=== HỆ THỐNG IMPORT DỮ LIỆU SENSORX ===\n');
@@ -52,7 +53,10 @@ async function main() {
     await importPrices([]);
   }
 
-  console.log('\n=== QUÁ TRÌNH IMPORT HOÀN TẤT ===');
+  console.log('\n=== QUÁ TRÌNH IMPORT DỮ LIỆU HOÀN TẤT ===');
+  
+  console.log('\n=== CHUẨN BỊ MÔ PHỎNG HÀNH VI CHỐT ĐƠN E2E ===\n');
+  await runSimulation();
 }
 
 main().catch(console.error);
