@@ -28,8 +28,17 @@ npm run crawl
 ```
 Dữ liệu sẽ tự động lưu dưới dạng JSON vào thư mục `data/product/`.
 
-### 2. Đẩy dữ liệu vào hệ thống (Import)
-Chạy lệnh sau để tự động đọc toàn bộ file trong `data/product` và `data/price`, sau đó đẩy lên SensorX qua API Gateway:
+### 2. Chuẩn bị và Đẩy dữ liệu vào hệ thống (Import)
+Trước khi import dữ liệu mới, nếu bạn muốn làm sạch toàn bộ CSDL hiện tại, hãy chạy script:
+```powershell
+.\run_clean_data.ps1
+```
+
+Sau đó, chạy lệnh sau để hệ thống tự động:
+1. Khởi tạo tài khoản Staff mặc định và Khách hàng mẫu.
+2. Quét file trong `data/product` để import sản phẩm.
+3. Quét file trong `data/price` để import bảng giá.
+
 ```bash
 npm run import
 ```

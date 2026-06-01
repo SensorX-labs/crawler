@@ -1,10 +1,14 @@
 import path from 'path';
 import { getAllJSONFiles, readJSONFile } from './src/utils/api.js';
+import { seedAccountsAndCustomers } from './src/importers/accountApi.js';
 import { importProducts } from './src/importers/productApi.js';
 import { importPrices } from './src/importers/priceApi.js';
 
 async function main() {
   console.log('=== HỆ THỐNG IMPORT DỮ LIỆU SENSORX ===\n');
+
+  // Bước 1: Tạo tài khoản nhân viên & khách hàng mặc định
+  await seedAccountsAndCustomers();
 
   const productDir = path.join(process.cwd(), 'data', 'product');
   const priceDir = path.join(process.cwd(), 'data', 'price');

@@ -2,19 +2,13 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { STAFF_ACCOUNTS } from '../importers/accountApi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const API_GATEWAY = 'http://localhost:5053';
 
 const ADMIN_CREDENTIALS = { email: 'manager@sensorx.com', password: '123456' };
-const STAFF_ACCOUNTS = [
-    { email: 'nguyentungsk@gmail.com', password: 'password' }, // assuming default 'password' or '123456'? Wait, user said 123456!
-    { email: 'nguyenduyduc@gmail.com', password: 'password' },
-    { email: 'chuduchai@gmail.com', password: 'password' },
-];
-// Note: user said "Mật khẩu đều là 123456". Let's use 123456.
-STAFF_ACCOUNTS.forEach(s => s.password = '123456');
 
 // Utilities
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
