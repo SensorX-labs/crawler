@@ -7,7 +7,7 @@ DO $$
 DECLARE 
     r RECORD;
 BEGIN
-    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != '__EFMigrationsHistory') LOOP
-        EXECUTE 'TRUNCATE TABLE "' || r.tablename || '" RESTART IDENTITY CASCADE;';
+    FOR r IN (SELECT schemaname, tablename FROM pg_tables WHERE schemaname IN ('public', 'read') AND tablename != '__EFMigrationsHistory') LOOP
+        EXECUTE 'TRUNCATE TABLE "' || r.schemaname || '"."' || r.tablename || '" RESTART IDENTITY CASCADE;';
     END LOOP;
 END $$;

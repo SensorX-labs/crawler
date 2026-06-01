@@ -1,12 +1,67 @@
 import path from 'path';
+import { exec } from 'child_process';
+import util from 'util';
 import { getAllJSONFiles, readJSONFile } from './src/utils/api.js';
 import { seedAccountsAndCustomers } from './src/importers/accountApi.js';
 import { importProducts } from './src/importers/productApi.js';
 import { importPrices } from './src/importers/priceApi.js';
 import { runSimulation } from './src/simulators/simulate_closing_behavior.js';
 
+const execPromise = util.promisify(exec);
+
+async function cleanData() {
+  const databases = [
+    "SensorX_Data", 
+    "SensorX_Master", 
+    "SensorX_Warehouse",
+    "SensorX_Warehouse_1", 
+    "SensorX_Warehouse_2",
+    "sensorx_gateway"
+  ];
+  const containerName = "sensorx_postgres";
+  const sqlFile = path.join(process.cwd(), "clean_all_data.sql");
+  const fileName = "clean_all_data.sql";
+
+  console.log("Starting data cleanup process...");
+
+  try {
+    const { stdout } = await execPromise(`docker ps -q -f name=${containerName}`);
+    if (stdout.trim()) {
+      console.log(`Tìm thấy Docker container '${containerName}'. Bắt đầu xóa dữ liệu...`);
+      await execPromise(`docker cp "${sqlFile}" "${containerName}:/tmp/${fileName}"`);
+      
+      for (const db of databases) {
+        console.log(`Đang xóa dữ liệu Database: ${db} ...`);
+        try {
+          await execPromise(`docker exec ${containerName} psql -U postgres -d ${db} -f "/tmp/${fileName}"`);
+          console.log(`Hoàn tất xóa ${db}`);
+        } catch (err) {
+          // ignore error
+        }
+      }
+    } else {
+      console.log(`Không tìm thấy Docker container '${containerName}'. Thử dùng psql cục bộ...`);
+      for (const db of databases) {
+        console.log(`Đang xóa dữ liệu Database: ${db} ...`);
+        try {
+          await execPromise(`psql -h localhost -U postgres -d ${db} -f "${sqlFile}"`, { env: { ...process.env, PGPASSWORD: "sk1234" } });
+          console.log(`Hoàn tất xóa ${db}`);
+        } catch (err) {
+          // ignore error
+        }
+      }
+    }
+    console.log("Tất cả dữ liệu đã được dọn dẹp!\n");
+  } catch (err) {
+    console.error("Lỗi trong quá trình dọn dẹp:", err);
+  }
+}
+
 async function main() {
   console.log('=== HỆ THỐNG IMPORT DỮ LIỆU SENSORX ===\n');
+
+  // Bước 0: Dọn dẹp dữ liệu cũ
+  await cleanData();
 
   // Bước 1: Tạo tài khoản nhân viên & khách hàng mặc định
   await seedAccountsAndCustomers();
