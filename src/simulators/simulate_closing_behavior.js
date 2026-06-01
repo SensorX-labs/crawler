@@ -170,6 +170,7 @@ export async function runSimulation() {
     }
 
     const NUM_CUSTOMERS = 40;
+    const BATCH_SIZE = 5;
     let successCount = 0;
 
     const managerClient = staffClients['manager@sensorx.com'];
@@ -178,7 +179,7 @@ export async function runSimulation() {
         return;
     }
 
-    for (let i = 1; i <= NUM_CUSTOMERS; i++) {
+    const processTransaction = async (i) => {
         console.log(`\n--- Bắt đầu giao dịch ${i}/${NUM_CUSTOMERS} ---`);
 
         const selectedCustomer = CUSTOMER_ACCOUNTS[Math.floor(Math.random() * CUSTOMER_ACCOUNTS.length)];
@@ -187,7 +188,7 @@ export async function runSimulation() {
         const loggedIn = await customerClient.login();
         if (!loggedIn) {
             console.log(`Bỏ qua giao dịch ${i} do không login được Khách hàng ${selectedCustomer.email}.`);
-            continue;
+            return false;
         }
 
         try {
@@ -197,7 +198,7 @@ export async function runSimulation() {
             // Chờ AI phân bổ
             let assignedStaffId = null;
             let pollingAttempts = 0;
-            const maxPollingAttempts = 10;
+            const maxPollingAttempts = 15; // Tăng thời gian chờ lên một chút do xử lý batch
 
             while (!assignedStaffId && pollingAttempts < maxPollingAttempts) {
                 const rfqDetailRes = await managerClient.axios.get(`/api/master/rfq/${rfqId}`);
@@ -211,7 +212,7 @@ export async function runSimulation() {
 
             if (!assignedStaffId) {
                 console.log(`RFQ chưa được AI phân bổ sau ${maxPollingAttempts} giây. Bỏ qua giao dịch này...`);
-                continue;
+                return false;
             }
 
             // Lấy staff client tương ứng
@@ -219,10 +220,13 @@ export async function runSimulation() {
 
             if (!assignedStaffClient) {
                 console.log(`Không tìm thấy nhân viên đang giữ RFQ ${rfqId} trong inbox.`);
-                continue;
+                return false;
             }
 
-            console.log(`AI đã phân bổ RFQ cho: ${assignedStaffClient.email}`);
+            console.log(`Giao dịch ${i} - AI đã phân bổ RFQ cho: ${assignedStaffClient.email}`);
+
+            // Thêm delay nhẹ (giả lập nhân viên suy nghĩ/chờ đợi giữa lúc nhận đơn)
+            await delay(Math.random() * 2000 + 1000);
 
             // Nhân viên Accept RFQ
             await assignedStaffClient.acceptRFQ(rfqId);
@@ -240,15 +244,34 @@ export async function runSimulation() {
             const isAccepted = Math.random() > 0.3; // 70% win rate
             await customerClient.respondQuote(quoteId, isAccepted);
 
-            console.log(`Khách hàng đã phản hồi: ${isAccepted ? 'CHỐT ĐƠN' : 'TỪ CHỐI'}. (AI Backward Pass triggered in Backend)`);
-            successCount++;
+            console.log(`Giao dịch ${i} - Khách hàng đã phản hồi: ${isAccepted ? 'CHỐT ĐƠN' : 'TỪ CHỐI'}. (AI Backward Pass triggered)`);
+            return true;
 
         } catch (error) {
             console.error(`Lỗi trong luồng giao dịch ${i}:`, error?.response?.data || error.message);
             if (error?.response?.status === 404) {
                 console.error(`404 URL:`, error.response.config.url);
             }
+            return false;
         }
+    };
+
+    const numBatches = Math.ceil(NUM_CUSTOMERS / BATCH_SIZE);
+    for (let b = 0; b < numBatches; b++) {
+        console.log(`\n=== BẮT ĐẦU LÔ GIAO DỊCH ${b + 1}/${numBatches} ===`);
+        const batchTasks = [];
+        for (let j = 1; j <= BATCH_SIZE; j++) {
+            const index = b * BATCH_SIZE + j;
+            if (index > NUM_CUSTOMERS) break;
+            batchTasks.push(processTransaction(index));
+        }
+        
+        // Execute batch concurrently
+        const results = await Promise.all(batchTasks);
+        successCount += results.filter(r => r).length;
+        
+        console.log(`=== HOÀN TẤT LÔ ${b + 1}. Đang chờ vài giây trước lô tiếp theo... ===`);
+        await delay(3000);
     }
 
     console.log(`\n🎉 Hoàn tất giả lập! Chạy thành công ${successCount}/${NUM_CUSTOMERS} giao dịch.`);
