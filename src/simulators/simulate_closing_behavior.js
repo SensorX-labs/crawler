@@ -35,43 +35,80 @@ class SensorXClient {
         }
     }
 
-    async createStaff(role) {
-        try {
-            const res = await this.axios.post('/auth/create', {
-                email: this.email,
-                password: this.password,
-                role: role
-            });
-            console.log(`Tạo tài khoản ${this.email} thành công.`);
-            return true;
-        } catch (e) {
-            console.error(`Lỗi tạo tài khoản ${this.email}:`, e?.response?.data || e.message);
-            return false;
+    async createAndSendRFQ(categories, productsByCategory) {
+        const numItems = Math.floor(Math.random() * 3) + 1;
+        const items = [];
+        const selectedCategory = categories[Math.floor(Math.random() * categories.length)];
+        const categoryProducts = productsByCategory[selectedCategory];
+
+        for (let j = 0; j < numItems; j++) {
+            const product = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
+            if (!items.find(x => x.productId === product.id)) {
+                items.push({
+                    productId: product.id,
+                    quantity: Math.floor(Math.random() * 10) + 1
+                });
+            }
         }
+
+        const rfqRes = await this.axios.post('/api/master/rfq', { items });
+        const rfqId = rfqRes.data.value.id || rfqRes.data.value; // depends on Response Wrapper
+        console.log(`Tạo RFQ thành công: ${rfqId}`);
+
+        await this.axios.post('/api/master/rfq/send', { id: rfqId });
+        console.log(`Đã gửi RFQ ${rfqId}, chờ AI phân bổ...`);
+        return rfqId;
     }
 
-    async register(name, phone, taxCode, address) {
-        try {
-            const res = await this.axios.post('/auth/register', {
-                email: this.email,
-                password: this.password,
-                name,
-                phone,
-                taxCode,
-                address
-            });
-            return res.data?.success || res.data?.isSuccess;
-        } catch (e) {
-            // Might already exist
-            return false;
-        }
+    async acceptRFQ(rfqId) {
+        await this.axios.post('/api/master/rfq/accept', { id: rfqId });
+    }
+
+    async createAndSubmitQuote(rfqId) {
+        const rfqStaffRes = await this.axios.get(`/api/master/rfq/${rfqId}`);
+        const requestedItems = rfqStaffRes.data.value.items || [];
+
+        const quoteItems = requestedItems.map(reqItem => ({
+            productId: reqItem.productId,
+            unitPrice: 500000 + Math.random() * 1000000, // random price
+            taxRate: 10
+        }));
+
+        const createQuoteRes = await this.axios.post('/api/master/quotes', {
+            rfqId: rfqId,
+            note: 'Báo giá tốt nhất cho khách hàng',
+            items: quoteItems
+        });
+        const quoteId = createQuoteRes.data.value;
+        console.log(`Nhân viên đã tạo Quote: ${quoteId}`);
+
+        await this.axios.post(`/api/master/quotes/${quoteId}/submit-for-approval`, {});
+        return quoteId;
+    }
+
+    async approveQuote(quoteId) {
+        await this.axios.post(`/api/master/quotes/${quoteId}/approve`, {});
+        console.log(`Quản lý đã duyệt Quote.`);
+    }
+
+    async publishQuote(quoteId) {
+        await this.axios.post(`/api/master/quotes/${quoteId}/publish`, {});
+    }
+
+    async respondQuote(quoteId, isAccepted) {
+        await this.axios.post(`/api/master/quotes/${quoteId}/customer-response`, {
+            id: quoteId,
+            responseType: isAccepted ? 0 : 1, // 0: Accepted, 1: Declined
+            paymentTerm: 1, // FullPayment
+            shippingAddress: 'Tại công trình',
+            recipientName: 'Anh Trưởng Phòng',
+            recipientPhone: '0909123456',
+            feedback: isAccepted ? 'Giá OK' : 'Giá quá đắt'
+        });
     }
 }
 
-export async function runSimulation() {
-    console.log('🚀 Bắt đầu giả lập E2E AI Training (Real Data)...');
-
-    // 1. Get a list of products (Use admin or anyone)
+export async function getMasterDataProducts() {
     console.log('Fetching products from Catalog...');
     const publicClient = axios.create({ baseURL: API_GATEWAY });
     let products = [];
@@ -82,12 +119,12 @@ export async function runSimulation() {
         }
     } catch (e) {
         console.error('Failed to fetch products:', e.message);
-        return;
+        return null;
     }
-    
+
     if (!products || products.length === 0) {
         console.log('No products found, cannot create RFQs.');
-        return;
+        return null;
     }
 
     const productsByCategory = {};
@@ -102,29 +139,22 @@ export async function runSimulation() {
 
     console.log(`Found ${products.length} products across ${categories.length} categories.`);
 
-    const adminClient = new SensorXClient(ADMIN_CREDENTIALS.email, ADMIN_CREDENTIALS.password);
-    let adminLogged = await adminClient.login();
-    if (!adminLogged) {
-        // Maybe admin is using different password, let's just create a Manager account
-        console.log('Tạo tài khoản Manager thay thế cho Admin...');
-        await adminClient.createStaff(3); // Role.Manager
-        adminLogged = await adminClient.login();
-        if (!adminLogged) {
-            console.error('Không thể đăng nhập tài khoản Admin/Manager!');
-            return;
-        }
-    }
+    return { categories, productsByCategory };
+}
+
+export async function runSimulation() {
+    console.log('🚀 Bắt đầu giả lập E2E AI Training (Real Data)...');
+
+    // 1. Get a list of products (Use admin or anyone)
+    const masterData = await getMasterDataProducts();
+    if (!masterData) return;
+    const { categories, productsByCategory } = masterData;
 
     // Cache staff clients
     const staffClients = {};
     for (const staff of STAFF_ACCOUNTS) {
         const client = new SensorXClient(staff.email, staff.password);
         let logged = await client.login();
-        if (!logged) {
-            console.log(`Tạo tài khoản Staff: ${staff.email}...`);
-            await client.createStaff(staff.role);
-            logged = await client.login();
-        }
         if (logged) {
             // Get staff profile to get their ID
             try {
@@ -139,7 +169,7 @@ export async function runSimulation() {
         }
     }
 
-    const NUM_CUSTOMERS = 30;
+    const NUM_CUSTOMERS = 40;
     let successCount = 0;
 
     const managerClient = staffClients['manager@sensorx.com'];
@@ -150,10 +180,10 @@ export async function runSimulation() {
 
     for (let i = 1; i <= NUM_CUSTOMERS; i++) {
         console.log(`\n--- Bắt đầu giao dịch ${i}/${NUM_CUSTOMERS} ---`);
-        
+
         const selectedCustomer = CUSTOMER_ACCOUNTS[Math.floor(Math.random() * CUSTOMER_ACCOUNTS.length)];
         const customerClient = new SensorXClient(selectedCustomer.email, selectedCustomer.password);
-        
+
         const loggedIn = await customerClient.login();
         if (!loggedIn) {
             console.log(`Bỏ qua giao dịch ${i} do không login được Khách hàng ${selectedCustomer.email}.`);
@@ -161,121 +191,54 @@ export async function runSimulation() {
         }
 
         try {
-            // Thêm sản phẩm cùng danh mục và tạo RFQ
-            const numItems = Math.floor(Math.random() * 3) + 1;
-            const items = [];
-            const selectedCategory = categories[Math.floor(Math.random() * categories.length)];
-            const categoryProducts = productsByCategory[selectedCategory];
+            // Khách hàng tạo và gửi RFQ
+            const rfqId = await customerClient.createAndSendRFQ(categories, productsByCategory);
 
-            for (let j = 0; j < numItems; j++) {
-                const product = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
-                if (!items.find(x => x.productId === product.id)) {
-                    items.push({
-                        productId: product.id,
-                        quantity: Math.floor(Math.random() * 10) + 1
-                    });
+            // Chờ AI phân bổ
+            let assignedStaffId = null;
+            let pollingAttempts = 0;
+            const maxPollingAttempts = 10;
+
+            while (!assignedStaffId && pollingAttempts < maxPollingAttempts) {
+                const rfqDetailRes = await managerClient.axios.get(`/api/master/rfq/${rfqId}`);
+                assignedStaffId = rfqDetailRes.data.value.staffId;
+
+                if (!assignedStaffId) {
+                    pollingAttempts++;
+                    await delay(1000);
                 }
             }
 
-            const rfqRes = await customerClient.axios.post('/api/master/rfq', { items });
-            const rfqId = rfqRes.data.value.id || rfqRes.data.value; // depends on Response Wrapper
-            console.log(`Tạo RFQ thành công: ${rfqId}`);
-
-            // Gửi RFQ -> Kích hoạt AI phân bổ
-            await customerClient.axios.post('/api/master/rfq/send', { id: rfqId });
-            console.log(`Đã gửi RFQ ${rfqId}, chờ AI phân bổ...`);
-            
-            // Cho AI vài giây để xử lý
-            await delay(1000);
-
-            // Lấy thông tin RFQ bằng Manager để biết Staff nào được assign
-            const rfqDetailRes = await managerClient.axios.get(`/api/master/rfq/${rfqId}`);
-            let assignedStaffId = rfqDetailRes.data.value.staffId;
-            let wasForceAssigned = false;
-            
             if (!assignedStaffId) {
-                console.log(`RFQ chưa được AI phân bổ (StaffId null). Dùng Manager ép phân bổ...`);
-                // Get all staffs to find one
-                const staffsRes = await managerClient.axios.get('/api/master/rfq/load-more-sale-staff?pageIndex=1&pageSize=100&isDescending=false');
-                const staffs = staffsRes.data.value?.items || staffsRes.data.value || [];
-                if (staffs.length === 0) {
-                    console.error('Không có SaleStaff nào trong hệ thống! Không thể ép phân bổ.');
-                    continue;
-                }
-                const randomStaff = staffs[Math.floor(Math.random() * staffs.length)];
-                await managerClient.axios.post(`/api/master/rfq/force-assign`, {
-                    id: rfqId,
-                    staffId: randomStaff.id
-                });
-                console.log(`Đã ép phân bổ cho Staff ${randomStaff.id}`);
-                assignedStaffId = randomStaff.id;
-                wasForceAssigned = true;
+                console.log(`RFQ chưa được AI phân bổ sau ${maxPollingAttempts} giây. Bỏ qua giao dịch này...`);
+                continue;
             }
 
-            // Map StaffId to Email
-            let assignedStaffClient = null;
-            let assignedStaffEmail = '';
-            for (const email of Object.keys(staffClients)) {
-                if (staffClients[email].staffId === assignedStaffId) {
-                    assignedStaffClient = staffClients[email];
-                    assignedStaffEmail = email;
-                    break;
-                }
-            }
+            // Lấy staff client tương ứng
+            let assignedStaffClient = Object.values(staffClients).find(c => c.staffId === assignedStaffId);
 
             if (!assignedStaffClient) {
                 console.log(`Không tìm thấy nhân viên đang giữ RFQ ${rfqId} trong inbox.`);
                 continue;
             }
 
-            console.log(`AI đã phân bổ RFQ cho: ${assignedStaffEmail}`);
+            console.log(`AI đã phân bổ RFQ cho: ${assignedStaffClient.email}`);
 
-            // Nhân viên Accept RFQ (Nếu AI phân bổ thì Status là Pending, cần Accept. Nếu Manager ép gán thì đã Accepted)
-            if (!wasForceAssigned) {
-                await assignedStaffClient.axios.post('/api/master/rfq/accept', { id: rfqId });
-            }
+            // Nhân viên Accept RFQ
+            await assignedStaffClient.acceptRFQ(rfqId);
 
-            // Nhân viên Tạo báo giá Draft
-            // Fetch RFQ detail as staff to get the requested items
-            const rfqStaffRes = await assignedStaffClient.axios.get(`/api/master/rfq/${rfqId}`);
-            const requestedItems = rfqStaffRes.data.value.items || [];
-            
-            const quoteItems = requestedItems.map(reqItem => ({
-                productId: reqItem.productId,
-                unitPrice: 500000 + Math.random() * 1000000, // random price
-                taxRate: 10
-            }));
+            // Nhân viên tạo và submit Quote
+            const quoteId = await assignedStaffClient.createAndSubmitQuote(rfqId);
 
-            const createQuoteRes = await assignedStaffClient.axios.post('/api/master/quotes', {
-                rfqId: rfqId,
-                note: 'Báo giá tốt nhất cho khách hàng',
-                items: quoteItems
-            });
-            const quoteId = createQuoteRes.data.value;
-            console.log(`Nhân viên đã tạo Quote: ${quoteId}`);
+            // Quản lý duyệt Quote
+            await managerClient.approveQuote(quoteId);
 
-            // Nhân viên Submit For Approval
-            await assignedStaffClient.axios.post(`/api/master/quotes/${quoteId}/submit-for-approval`, {});
+            // Nhân viên publish Quote
+            await assignedStaffClient.publishQuote(quoteId);
 
-            // Quản lý Approve
-            await managerClient.axios.post(`/api/master/quotes/${quoteId}/approve`, {});
-            console.log(`Quản lý đã duyệt Quote.`);
-
-            // Nhân viên Publish
-            await assignedStaffClient.axios.post(`/api/master/quotes/${quoteId}/publish`, {});
-
-            // Khách hàng phản hồi (AI Backward Pass sẽ chạy ở backend)
-            // Khách hàng đôi khi Accept, đôi khi Reject dựa trên WinRate.
+            // Khách hàng phản hồi
             const isAccepted = Math.random() > 0.3; // 70% win rate
-            await customerClient.axios.post(`/api/master/quotes/${quoteId}/customer-response`, {
-                id: quoteId, // Although ID is in route, it might be required in body depending on command
-                responseType: isAccepted ? 0 : 1, // 0: Accepted, 1: Declined
-                paymentTerm: 1, // FullPayment
-                shippingAddress: 'Tại công trình',
-                recipientName: 'Anh Trưởng Phòng',
-                recipientPhone: '0909123456',
-                feedback: isAccepted ? 'Giá OK' : 'Giá quá đắt'
-            });
+            await customerClient.respondQuote(quoteId, isAccepted);
 
             console.log(`Khách hàng đã phản hồi: ${isAccepted ? 'CHỐT ĐƠN' : 'TỪ CHỐI'}. (AI Backward Pass triggered in Backend)`);
             successCount++;

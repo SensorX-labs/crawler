@@ -6,6 +6,8 @@ import { seedAccountsAndCustomers } from './src/importers/accountApi.js';
 import { importProducts } from './src/importers/productApi.js';
 import { importPrices } from './src/importers/priceApi.js';
 import { runSimulation } from './src/simulators/simulate_closing_behavior.js';
+import axios from 'axios';
+import { GATEWAY_URL } from './src/utils/api.js';
 
 const execPromise = util.promisify(exec);
 
@@ -50,6 +52,14 @@ async function cleanData() {
           // ignore error
         }
       }
+    }
+    console.log("Đang khởi động lại container gateway để tái tạo tài khoản Admin...");
+    try {
+      await execPromise("docker restart sensorx_gateway");
+      console.log("Chờ 10 giây để gateway khởi động hoàn tất...");
+      await new Promise(resolve => setTimeout(resolve, 10000));
+    } catch (e) {
+      console.log("Không thể khởi động lại gateway: " + e.message);
     }
     console.log("Tất cả dữ liệu đã được dọn dẹp!\n");
   } catch (err) {
@@ -111,6 +121,16 @@ async function main() {
   console.log('\n=== QUÁ TRÌNH IMPORT DỮ LIỆU HOÀN TẤT ===');
   
   console.log('\n=== CHUẨN BỊ MÔ PHỎNG HÀNH VI CHỐT ĐƠN E2E ===\n');
+  
+  // Seed AI Hyperparameters
+  try {
+    console.log('Khởi tạo siêu tham số AI (AI Hyperparameters)...');
+    await axios.post(`${GATEWAY_URL}/api/master/ai/hyperparameters/reset`);
+    console.log('-> Khởi tạo thành công.');
+  } catch (err) {
+    console.error('Lỗi khi khởi tạo siêu tham số AI:', err.message);
+  }
+
   await runSimulation();
 }
 
