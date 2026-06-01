@@ -76,7 +76,7 @@ export async function runSimulation() {
     const publicClient = axios.create({ baseURL: API_GATEWAY });
     let products = [];
     try {
-        const prodRes = await publicClient.get('/api/data/catalog/products/list?pageSize=100');
+        const prodRes = await publicClient.get('/api/data/catalog/products/list?pageSize=2000');
         if (prodRes.data?.isSuccess) {
             products = prodRes.data.value.items || prodRes.data.value;
         }
@@ -89,7 +89,18 @@ export async function runSimulation() {
         console.log('No products found, cannot create RFQs.');
         return;
     }
-    console.log(`Found ${products.length} products.`);
+
+    const productsByCategory = {};
+    for (const p of products) {
+        const cat = p.categoryName || 'Unknown';
+        if (!productsByCategory[cat]) {
+            productsByCategory[cat] = [];
+        }
+        productsByCategory[cat].push(p);
+    }
+    const categories = Object.keys(productsByCategory);
+
+    console.log(`Found ${products.length} products across ${categories.length} categories.`);
 
     const adminClient = new SensorXClient(ADMIN_CREDENTIALS.email, ADMIN_CREDENTIALS.password);
     let adminLogged = await adminClient.login();
@@ -152,15 +163,20 @@ export async function runSimulation() {
         }
 
         try {
-            // Thêm sản phẩm và tạo RFQ
+            // Thêm sản phẩm cùng danh mục và tạo RFQ
             const numItems = Math.floor(Math.random() * 3) + 1;
             const items = [];
+            const selectedCategory = categories[Math.floor(Math.random() * categories.length)];
+            const categoryProducts = productsByCategory[selectedCategory];
+
             for (let j = 0; j < numItems; j++) {
-                const product = products[Math.floor(Math.random() * products.length)];
-                items.push({
-                    productId: product.id,
-                    quantity: Math.floor(Math.random() * 10) + 1
-                });
+                const product = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
+                if (!items.find(x => x.productId === product.id)) {
+                    items.push({
+                        productId: product.id,
+                        quantity: Math.floor(Math.random() * 10) + 1
+                    });
+                }
             }
 
             const rfqRes = await customerClient.axios.post('/api/master/rfq', { items });
