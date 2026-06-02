@@ -12,9 +12,6 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
-# crawled data files
-products_*.json
-
 # OS files
 .DS_Store
 Thumbs.db
