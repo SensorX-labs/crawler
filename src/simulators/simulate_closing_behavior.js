@@ -6,7 +6,7 @@ import { STAFF_ACCOUNTS, CUSTOMER_ACCOUNTS } from '../importers/accountApi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const API_GATEWAY = 'http://localhost:5053';
+const API_GATEWAY = process.env.GATEWAY_URL || 'http://localhost:5053';
 
 const ADMIN_CREDENTIALS = { email: 'manager@sensorx.com', password: '123456' };
 

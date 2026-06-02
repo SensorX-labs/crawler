@@ -2,7 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 
-export const GATEWAY_URL = 'http://localhost:5053';
+export const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:5053';
 
 export async function getManagerToken() {
   console.log('Đang kết nối tới Gateway để lấy Access Token cho manager@sensorx.com...');

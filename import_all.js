@@ -27,39 +27,57 @@ async function cleanData() {
   console.log("Starting data cleanup process...");
 
   try {
-    const { stdout } = await execPromise(`docker ps -q -f name=${containerName}`);
-    if (stdout.trim()) {
-      console.log(`Tìm thấy Docker container '${containerName}'. Bắt đầu xóa dữ liệu...`);
-      await execPromise(`docker cp "${sqlFile}" "${containerName}:/tmp/${fileName}"`);
-      
+    const runningInDocker = process.env.RUNNING_IN_DOCKER === 'true';
+    if (runningInDocker) {
+      console.log("Running in Docker container. Using psql direct connection to postgres host...");
       for (const db of databases) {
         console.log(`Đang xóa dữ liệu Database: ${db} ...`);
         try {
-          await execPromise(`docker exec ${containerName} psql -U postgres -d ${db} -f "/tmp/${fileName}"`);
+          await execPromise(`psql -h postgres -U postgres -d ${db} -f "${sqlFile}"`, { env: { ...process.env, PGPASSWORD: "sk1234" } });
           console.log(`Hoàn tất xóa ${db}`);
         } catch (err) {
-          // ignore error
+          console.error(`Lỗi khi xóa ${db}:`, err.message);
         }
       }
     } else {
-      console.log(`Không tìm thấy Docker container '${containerName}'. Thử dùng psql cục bộ...`);
-      for (const db of databases) {
-        console.log(`Đang xóa dữ liệu Database: ${db} ...`);
-        try {
-          await execPromise(`psql -h localhost -U postgres -d ${db} -f "${sqlFile}"`, { env: { ...process.env, PGPASSWORD: "sk1234" } });
-          console.log(`Hoàn tất xóa ${db}`);
-        } catch (err) {
-          // ignore error
+      const { stdout } = await execPromise(`docker ps -q -f name=${containerName}`);
+      if (stdout.trim()) {
+        console.log(`Tìm thấy Docker container '${containerName}'. Bắt đầu xóa dữ liệu...`);
+        await execPromise(`docker cp "${sqlFile}" "${containerName}:/tmp/${fileName}"`);
+        
+        for (const db of databases) {
+          console.log(`Đang xóa dữ liệu Database: ${db} ...`);
+          try {
+            await execPromise(`docker exec ${containerName} psql -U postgres -d ${db} -f "/tmp/${fileName}"`);
+            console.log(`Hoàn tất xóa ${db}`);
+          } catch (err) {
+            // ignore error
+          }
+        }
+      } else {
+        console.log(`Không tìm thấy Docker container '${containerName}'. Thử dùng psql cục bộ...`);
+        for (const db of databases) {
+          console.log(`Đang xóa dữ liệu Database: ${db} ...`);
+          try {
+            await execPromise(`psql -h localhost -U postgres -d ${db} -f "${sqlFile}"`, { env: { ...process.env, PGPASSWORD: "sk1234" } });
+            console.log(`Hoàn tất xóa ${db}`);
+          } catch (err) {
+            // ignore error
+          }
         }
       }
     }
-    console.log("Đang khởi động lại container gateway để tái tạo tài khoản Admin...");
+    console.log("Đang khởi động lại container gateway và các warehouse để tái tạo dữ liệu hệ thống...");
     try {
-      await execPromise("docker restart sensorx_gateway");
-      console.log("Chờ 10 giây để gateway khởi động hoàn tất...");
+      await Promise.all([
+        execPromise("docker restart sensorx_gateway"),
+        execPromise("docker restart sensorx_warehouse_api_1"),
+        execPromise("docker restart sensorx_warehouse_api_2")
+      ]);
+      console.log("Chờ 10 giây để gateway và các warehouse khởi động hoàn tất...");
       await new Promise(resolve => setTimeout(resolve, 10000));
     } catch (e) {
-      console.log("Không thể khởi động lại gateway: " + e.message);
+      console.log("Không thể khởi động lại các container: " + e.message);
     }
     console.log("Tất cả dữ liệu đã được dọn dẹp!\n");
   } catch (err) {
