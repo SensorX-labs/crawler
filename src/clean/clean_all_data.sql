@@ -7,7 +7,14 @@ DO $$
 DECLARE 
     r RECORD;
 BEGIN
-    FOR r IN (SELECT schemaname, tablename FROM pg_tables WHERE schemaname IN ('public', 'read')) LOOP
-        EXECUTE 'DROP TABLE IF EXISTS "' || r.schemaname || '"."' || r.tablename || '" CASCADE;';
+    -- Lặp qua tất cả các bảng trong schema public và read, TRỪ bảng lịch sử migration
+    FOR r IN (
+        SELECT schemaname, tablename 
+        FROM pg_tables 
+        WHERE schemaname IN ('public', 'read') 
+          AND tablename != '__EFMigrationsHistory'
+    ) LOOP
+        -- Dùng TRUNCATE thay vì DROP để giữ lại cấu trúc bảng
+        EXECUTE 'TRUNCATE TABLE "' || r.schemaname || '"."' || r.tablename || '" CASCADE;';
     END LOOP;
 END $$;
