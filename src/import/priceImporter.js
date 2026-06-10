@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { getManagerToken, GATEWAY_URL } from '../utils/api.js';
+import { apiClient } from '../utils/apiClient.js';
 
 const BATCH_SIZE = 50;
 
@@ -27,16 +26,18 @@ function computeWordOverlap(name1, name2) {
 function estimatePrice(product, crawledPrices) {
   const category = product.categoryName;
   const productName = product.name;
-  
-  const sameCategorySamples = crawledPrices.filter(p => p.categoryName === category || p.category === category);
-  
+
+  const sameCategorySamples = crawledPrices.filter(
+    p => p.categoryName === category || p.category === category
+  );
+
   if (sameCategorySamples.length === 0) {
     return CATEGORY_FALLBACKS[category] || 100000;
   }
-  
+
   let bestMatch = null;
   let maxOverlap = 0;
-  
+
   for (const sample of sameCategorySamples) {
     const overlap = computeWordOverlap(productName, sample.name);
     if (overlap > maxOverlap) {
@@ -44,110 +45,114 @@ function estimatePrice(product, crawledPrices) {
       bestMatch = sample;
     }
   }
-  
-  if (maxOverlap >= 2 && bestMatch && bestMatch.price) {
+
+  if (maxOverlap >= 2 && bestMatch?.price) {
     return bestMatch.price;
   }
-  
+
   const validPrices = sameCategorySamples.filter(p => p.price && p.price > 0);
   if (validPrices.length === 0) return CATEGORY_FALLBACKS[category] || 100000;
 
-  const sum = validPrices.reduce((acc, curr) => acc + curr.price, 0);
-  const avg = Math.round(sum / validPrices.length);
+  const avg = Math.round(validPrices.reduce((acc, cur) => acc + cur.price, 0) / validPrices.length);
   return avg || CATEGORY_FALLBACKS[category] || 100000;
 }
 
-export async function importPrices(crawledPrices) {
-  const token = await getManagerToken();
-  const api = axios.create({
-    baseURL: `${GATEWAY_URL}/api/data`,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
+/**
+ * Import/cập nhật bảng giá cho tất cả sản phẩm trong hệ thống.
+ * Deactivate giá cũ → tạo giá mới.
+ *
+ * @param {Array} crawledPrices - Mảng giá tham chiếu từ crawl (có thể rỗng)
+ * @returns {{ success: number, skipped: number, errors: string[] }}
+ */
+export async function importPrices(crawledPrices = []) {
+  const result = { success: 0, skipped: 0, errors: [] };
 
-  console.log('Đang tải danh sách sản phẩm từ hệ thống để chuẩn bị làm giá...');
+  await apiClient.init();
+  const api = apiClient.data;
+
+  console.log('Đang tải danh sách sản phẩm từ hệ thống...');
   const prodRes = await api.get('/catalog/products/list?pageSize=100000');
   const products = prodRes.data.value?.items || [];
-  console.log(`Tổng số sản phẩm trong hệ thống: ${products.length}`);
+  console.log(`Tổng số sản phẩm: ${products.length}`);
 
   if (products.length === 0) {
-    console.log('Không có sản phẩm nào trong hệ thống, vui lòng import sản phẩm trước.');
-    return;
+    console.log('Không có sản phẩm nào, vui lòng import sản phẩm trước.');
+    return result;
   }
 
   console.log('Đang tải danh sách bảng giá hiện tại...');
   const priceRes = await api.get('/catalog/internal-prices/list?pageSize=100000');
   const existingPrices = priceRes.data.value?.items || [];
 
-  const activePrices = existingPrices.filter(p => p.status === 2 || p.status === 'Active' || !p.isExpired);
+  const activePrices = existingPrices.filter(
+    p => p.status === 2 || p.status === 'Active' || !p.isExpired
+  );
   const activePriceMap = new Map(activePrices.map(p => [p.productId, p]));
 
-  // 1. Deactivate
-  const deactivations = [];
-  for (const product of products) {
-    const activePrice = activePriceMap.get(product.id);
-    if (activePrice) {
-      deactivations.push(activePrice.id);
-    }
-  }
+  // 1. Deactivate giá cũ
+  const deactivations = products
+    .map(p => activePriceMap.get(p.id)?.id)
+    .filter(Boolean);
 
   if (deactivations.length > 0) {
-    console.log(`Bắt đầu deactivate ${deactivations.length} bảng giá cũ...`);
+    console.log(`Deactivate ${deactivations.length} bảng giá cũ...`);
     for (let i = 0; i < deactivations.length; i += BATCH_SIZE) {
       const batch = deactivations.slice(i, i + BATCH_SIZE);
       await Promise.all(batch.map(async (id) => {
         try {
           await api.patch(`/catalog/internal-prices/${id}/deactivate`);
         } catch (err) {
-          console.error(`Lỗi khi deactivate bảng giá ${id}:`, err.message);
+          result.errors.push(`Lỗi deactivate giá ${id}: ${err.message}`);
         }
       }));
     }
   }
 
-  // 2. Tạo mới
+  // 2. Tạo giá mới
   console.log('Bắt đầu tạo bảng giá mới...');
-  const payloads = [];
-  for (const product of products) {
+  const payloads = products.map(product => {
     let msrp = estimatePrice(product, crawledPrices);
     if (msrp < 10000) msrp = 10000;
-
     const suggestedPrice = Math.round(msrp);
     const floorPrice = Math.round(msrp * 0.75);
-    
-    const priceTiers = [
-      { quantity: 5, price: Math.round(suggestedPrice * 0.95) },
-      { quantity: 10, price: Math.round(suggestedPrice * 0.90) },
-      { quantity: 20, price: Math.round(suggestedPrice * 0.85) }
-    ];
-
-    payloads.push({
+    return {
       productId: product.id,
       suggestedPrice,
       floorPrice,
-      priceTiers,
+      priceTiers: [
+        { quantity: 5, price: Math.round(suggestedPrice * 0.95) },
+        { quantity: 10, price: Math.round(suggestedPrice * 0.90) },
+        { quantity: 20, price: Math.round(suggestedPrice * 0.85) }
+      ],
       isInfinite: true
-    });
-  }
+    };
+  });
 
-  let createdCount = 0;
   for (let i = 0; i < payloads.length; i += BATCH_SIZE) {
     const batch = payloads.slice(i, i + BATCH_SIZE);
     await Promise.all(batch.map(async (payload) => {
       try {
         await api.post('/catalog/internal-prices/create', payload);
-        createdCount++;
+        result.success++;
       } catch (err) {
-        console.error(`Lỗi khi tạo bảng giá cho SP ${payload.productId}:`, err.response?.data || err.message);
+        if (apiClient.isAlreadyExistsError(err)) {
+          result.skipped++;
+        } else {
+          const msg = `Lỗi tạo giá SP ${payload.productId}: ${err.response?.data?.message || err.message}`;
+          result.errors.push(msg);
+        }
       }
     }));
-    if (i % 500 === 0 && i > 0) {
-        console.log(`Đã tạo bảng giá: ${Math.min(i + BATCH_SIZE, payloads.length)}/${payloads.length}`);
+
+    if (i > 0 && i % 500 === 0) {
+      console.log(`Đã tạo bảng giá: ${Math.min(i + BATCH_SIZE, payloads.length)}/${payloads.length}`);
     }
   }
 
   console.log(`\n=== TỔNG KẾT IMPORT BẢNG GIÁ ===`);
-  console.log(`- Đã tạo thành công ${createdCount}/${payloads.length} bảng giá mới.`);
+  console.log(`- Đã tạo mới: ${result.success}/${payloads.length}`);
+  console.log(`- Bỏ qua: ${result.skipped}`);
+  console.log(`- Lỗi: ${result.errors.length}`);
+
+  return result;
 }

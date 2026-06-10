@@ -5,9 +5,9 @@ const PAGES_TO_CRAWL = 45;
 const BASE_URL = 'https://haiphongtech.vn/shop/';
 
 const KNOWN_SUPPLIERS = [
-  'JST', 'OMRON', 'AUTONICS', 'SEGIBIZ', 'SEGIBIBZ', 'SAMWON', 'KEYENCE', 
-  'PANASONIC', 'SCHNEIDER', 'MITSUBISHI', 'FOTEK', 'LS', 'SMC', 'YASKAWA', 
-  'SIEMENS', 'ABB', 'HONEYWELL', 'MEANWELL', 'KACON', 'HANYOUNG', 'KOINO', 
+  'JST', 'OMRON', 'AUTONICS', 'SEGIBIZ', 'SEGIBIBZ', 'SAMWON', 'KEYENCE',
+  'PANASONIC', 'SCHNEIDER', 'MITSUBISHI', 'FOTEK', 'LS', 'SMC', 'YASKAWA',
+  'SIEMENS', 'ABB', 'HONEYWELL', 'MEANWELL', 'KACON', 'HANYOUNG', 'KOINO',
   'JEONO', 'CHINT', 'SELEC', 'DELTA', 'MOLEX'
 ];
 
@@ -39,9 +39,7 @@ function detectCategory(title, htmlCategory) {
   const upperTitle = title.toUpperCase();
   for (const cat of KNOWN_CATEGORIES) {
     for (const kw of cat.keywords) {
-      if (upperTitle.includes(kw)) {
-        return cat.name;
-      }
+      if (upperTitle.includes(kw)) return cat.name;
     }
   }
   return 'Thiết bị tự động hóa';
@@ -89,14 +87,12 @@ export async function scrapeHaiPhongTech() {
         const productUrl = titleEl.attr('href');
 
         if (!title || !productUrl) return;
-
         if (visitedUrls.has(productUrl)) return;
         visitedUrls.add(productUrl);
 
         const htmlCategory = $(el).find('.category').first().text().trim();
         const categoryName = detectCategory(title, htmlCategory);
         const supplierName = detectSupplier(title);
-
         const imgEl = $(el).find('img').first();
         const imageUrl = getLargestImageUrl(imgEl, $);
 
@@ -107,11 +103,11 @@ export async function scrapeHaiPhongTech() {
           supplierName,
           categoryName,
           unitName: 'Cái',
-          price: 0 // Default to 0 for Haiphongtech since we don't parse prices here initially
+          price: 0
         });
       });
 
-      console.log(`Tổng số sản phẩm tích lũy được sau trang ${page}: ${products.length}`);
+      console.log(`Tổng sản phẩm tích lũy sau trang ${page}: ${products.length}`);
       await delay(800);
     } catch (error) {
       console.error(`Lỗi khi cào trang ${page}:`, error.message);
@@ -119,6 +115,6 @@ export async function scrapeHaiPhongTech() {
     }
   }
 
-  console.log(`=== HOÀN TẤT CÀO DỮ LIỆU. TỔNG SỐ SẢN PHẨM: ${products.length} ===`);
+  console.log(`=== HOÀN TẤT CÀO DỮ LIỆU. TỔNG SỐ: ${products.length} ===`);
   return products;
 }

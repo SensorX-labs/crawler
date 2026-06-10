@@ -14,26 +14,23 @@ const CATEGORIES = {
 function parsePrice(priceText) {
   if (!priceText) return null;
   const cleanText = priceText.replace(/\s/g, '');
-  
+
   if (priceText.includes('Giá hiện tại là:')) {
     const parts = priceText.split('Giá hiện tại là:');
     const currentPricePart = parts[parts.length - 1];
     const match = currentPricePart.match(/\d+(\.\d+)*/);
-    if (match) {
-      return parseInt(match[0].replace(/\./g, ''), 10);
-    }
+    if (match) return parseInt(match[0].replace(/\./g, ''), 10);
   }
-  
+
   const numbers = cleanText.match(/\d+(\.\d+)*/g);
   if (!numbers || numbers.length === 0) return null;
-  
   return parseInt(numbers[0].replace(/\./g, ''), 10);
 }
 
 async function scrapeCategory(categoryName, url) {
   const products = [];
   console.log(`Đang cào danh mục: ${categoryName} (${url})...`);
-  
+
   try {
     const res = await axios.get(url, {
       headers: {
@@ -41,9 +38,9 @@ async function scrapeCategory(categoryName, url) {
       },
       timeout: 10000
     });
-    
+
     const $ = cheerio.load(res.data);
-    
+
     $('li.product').each((i, el) => {
       const name = $(el).find('.woocommerce-loop-product__title, h2, h3').text().trim();
       const priceText = $(el).find('.price').text().trim();
@@ -51,37 +48,36 @@ async function scrapeCategory(categoryName, url) {
       const price = parsePrice(priceText);
       const imgEl = $(el).find('img').first();
       const imageUrl = imgEl.attr('src') || imgEl.attr('data-src') || '';
-      
+
       if (name) {
         products.push({
           categoryName,
           name,
           price: price || 0,
           productUrl: link,
-          imageUrl: imageUrl,
+          imageUrl,
           supplierName: 'Hải Âu',
           unitName: 'Cái'
         });
       }
     });
-    
+
     console.log(`-> Tìm thấy ${products.length} sản phẩm.`);
   } catch (err) {
     console.error(`Lỗi khi cào danh mục ${categoryName}:`, err.message);
   }
-  
+
   return products;
 }
 
 export async function scrapeHaiAu() {
   const allProducts = [];
-  
+
   for (const [name, url] of Object.entries(CATEGORIES)) {
     const products = await scrapeCategory(name, url);
     allProducts.push(...products);
-    // Delay nhẹ tránh spam server
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
-  
+
   return allProducts;
 }

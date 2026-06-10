@@ -1,20 +1,23 @@
-import axios from 'axios';
-import { getManagerToken, GATEWAY_URL } from '../utils/api.js';
+import { apiClient } from '../utils/apiClient.js';
 
+/**
+ * Import sản phẩm đã crawl vào hệ thống.
+ * Tự động tạo Nhà cung cấp, Danh mục, Đơn vị tính nếu chưa có.
+ * Bỏ qua sản phẩm đã tồn tại (theo tên).
+ *
+ * @param {Array} scrapedProducts - Mảng sản phẩm từ file JSON crawl
+ * @returns {{ success: number, skipped: number, errors: string[] }}
+ */
 export async function importProducts(scrapedProducts) {
+  const result = { success: 0, skipped: 0, errors: [] };
+
   if (!scrapedProducts || scrapedProducts.length === 0) {
     console.log('Không có dữ liệu sản phẩm để import.');
-    return;
+    return result;
   }
 
-  const token = await getManagerToken();
-  const api = axios.create({
-    baseURL: `${GATEWAY_URL}/api/data`,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  });
+  await apiClient.init();
+  const api = apiClient.data;
 
   // 1. Tải danh mục hiện tại
   console.log('Đang tải danh mục sản phẩm từ hệ thống...');
@@ -34,8 +37,8 @@ export async function importProducts(scrapedProducts) {
   const units = unitRes.data.value || [];
   const unitMap = new Map(units.map(u => [u.name.toLowerCase().trim(), u.id]));
 
-  // 4. Tải danh sách hàng hóa hiện có
-  console.log('Đang tải danh sách hàng hóa hiện tại để đối chiếu...');
+  // 4. Tải danh sách sản phẩm hiện có để đối chiếu
+  console.log('Đang tải danh sách sản phẩm hiện tại...');
   const prodRes = await api.get('/catalog/products/list?pageSize=100000');
   const existingProducts = prodRes.data.value?.items || [];
   const existingNamesSet = new Set(existingProducts.map(p => p.name.toLowerCase().trim()));
@@ -53,23 +56,22 @@ export async function importProducts(scrapedProducts) {
     unitMap.set('cái', defaultUnitId);
   }
 
-  let importedCount = 0;
-  let skippedCount = 0;
+  console.log(`\n=== BẮT ĐẦU IMPORT ${scrapedProducts.length} SẢN PHẨM ===`);
 
-  console.log('=== BẮT ĐẦU IMPORT SẢN PHẨM ===');
   for (const item of scrapedProducts) {
     const normalizedName = item.name.toLowerCase().trim();
-    
+
+    // Bỏ qua nếu đã tồn tại
     if (existingNamesSet.has(normalizedName)) {
-      skippedCount++;
+      result.skipped++;
       continue;
     }
 
     try {
+      // Tạo/lấy Nhà cung cấp
       const normSupplier = (item.supplierName || 'Unknown').toLowerCase().trim();
       let supplierId = supplierMap.get(normSupplier);
       if (!supplierId) {
-        console.log(`Nhà cung cấp "${item.supplierName}" chưa tồn tại, đang tạo mới...`);
         const createSupRes = await api.post('/catalog/suppliers/create', {
           name: item.supplierName || 'Unknown',
           description: 'Hãng sản xuất'
@@ -78,10 +80,10 @@ export async function importProducts(scrapedProducts) {
         supplierMap.set(normSupplier, supplierId);
       }
 
+      // Tạo/lấy Danh mục
       const normCategory = (item.categoryName || 'Unknown').toLowerCase().trim();
       let categoryId = categoryMap.get(normCategory);
       if (!categoryId) {
-        console.log(`Danh mục "${item.categoryName}" chưa tồn tại, đang tạo mới...`);
         const createCatRes = await api.post('/catalog/categories/create', {
           name: item.categoryName || 'Unknown',
           description: 'Danh mục hàng hóa'
@@ -90,28 +92,37 @@ export async function importProducts(scrapedProducts) {
         categoryMap.set(normCategory, categoryId);
       }
 
-      const payload = {
+      await api.post('/catalog/products/create', {
         name: item.name,
-        supplierId: supplierId,
-        categoryId: categoryId,
+        supplierId,
+        categoryId,
         unitOfQuantityId: defaultUnitId,
         showcase: item.imageUrl || null,
         images: item.imageUrl ? [item.imageUrl] : []
-      };
+      });
 
-      await api.post('/catalog/products/create', payload);
-      importedCount++;
+      result.success++;
       existingNamesSet.add(normalizedName);
 
-      if (importedCount % 50 === 0) {
-        console.log(`Đã import thành công: ${importedCount} sản phẩm (Bỏ qua trùng lặp: ${skippedCount})`);
+      if (result.success % 50 === 0) {
+        console.log(`Đã import: ${result.success} sản phẩm (Bỏ qua: ${result.skipped})`);
       }
     } catch (err) {
-      console.error(`Lỗi khi import sản phẩm "${item.name}":`, err.response?.data || err.message);
+      if (apiClient.isAlreadyExistsError(err)) {
+        result.skipped++;
+        existingNamesSet.add(normalizedName);
+      } else {
+        const msg = `Lỗi SP "${item.name}": ${err.response?.data?.message || err.message}`;
+        result.errors.push(msg);
+        console.error(msg);
+      }
     }
   }
 
   console.log(`\n=== TỔNG KẾT IMPORT SẢN PHẨM ===`);
-  console.log(`- Đã import mới thành công: ${importedCount}`);
-  console.log(`- Bỏ qua do trùng lặp: ${skippedCount}`);
+  console.log(`- Đã import mới: ${result.success}`);
+  console.log(`- Bỏ qua trùng lặp: ${result.skipped}`);
+  console.log(`- Lỗi: ${result.errors.length}`);
+
+  return result;
 }

@@ -2,12 +2,17 @@
   "name": "SensorX.Miner",
   "version": "1.0.0",
   "description": "Data Miner, Importer and AI Training Simulator for SensorX",
-  "main": "crawl.js",
+  "main": "miner.js",
   "type": "module",
   "scripts": {
-    "crawl": "node crawl.js",
-    "import": "node import_all.js",
-    "simulate": "node src/simulators/simulate_closing_behavior.js"
+    "import:all":     "node miner.js import --all",
+    "import:account": "node miner.js import --account",
+    "import:product": "node miner.js import --product",
+    "import:price":   "node miner.js import --price",
+    "import:stockin": "node miner.js import --stockin",
+    "crawl":          "node miner.js crawl",
+    "clean":          "node miner.js clean --all",
+    "report":         "node miner.js report"
   },
   "dependencies": {
     "axios": "^1.6.8",
